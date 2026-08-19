@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "./proxy"
+    ],
+    "python.venvPath": ".",
+    "python.venvFolders": ["./proxy/.venv"]
+}
