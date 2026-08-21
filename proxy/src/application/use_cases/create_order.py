@@ -9,6 +9,7 @@ class CreateOrder:
         self.order_publisher = order_publisher
 
     async def create_order(self, customer_id: str, food_items: list[Food]) -> Order:
+        print(food_items)
         order = Order(id=str(uuid4()), customer_id=customer_id, items=food_items)
         await self.order_publisher.publish(order)
         return order

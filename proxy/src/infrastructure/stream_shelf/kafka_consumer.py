@@ -1,19 +1,19 @@
 import asyncio
 import json
 from aiokafka import AIOKafkaConsumer
-import typing
+import typing as tp
 
 from src.config import KafkaSettings
-from src.application.use_cases.receive_tray import ReceiveTray
 from src.domain import FinishedOrder
 from src.infrastructure.lifecycle import Startable
+from src.application.ports import StreamShelf
 
 
 IDENTITY_HEADERS = {"event_type": "order.finished", "schema_version": "1"}
 
 
 def verify_headers(
-    headers: typing.Iterable[tuple[str, bytes]], expected_headers: dict[str, str]
+    headers: tp.Iterable[tuple[str, bytes]], expected_headers: dict[str, str]
 ) -> bool:
     for key, value in headers:
         if key in expected_headers and value.decode() != expected_headers[key]:
@@ -29,10 +29,9 @@ def decode_message_value(value: bytes) -> FinishedOrder | None:
         return None
 
 
-class KafkaTrayReceiver(Startable):
-    def __init__(self, settings: KafkaSettings, receive_tray_use_case: ReceiveTray):
+class KafkaTrayReceiver(StreamShelf, Startable):
+    def __init__(self, settings: KafkaSettings):
         self._settings = settings
-        self._receive_tray_use_case = receive_tray_use_case
         self._consumer: AIOKafkaConsumer | None = None
         self._task: asyncio.Task | None = None
 
@@ -48,13 +47,15 @@ class KafkaTrayReceiver(Startable):
         )
         await self._consumer.start()
         print("Kafka consumer started. Listening for finished orders...")
-        self._task = asyncio.create_task(self._process_loop())
 
     async def stop(self):
         if self._consumer:
             await self._consumer.stop()
 
-    async def _process_loop(self):
+    async def __next__(self):
+        return self
+
+    async def stream(self) -> tp.AsyncIterator[FinishedOrder]:
         if not self._consumer:
             raise RuntimeError("Consumer is not initialized. Call start() first.")
 
@@ -75,6 +76,6 @@ class KafkaTrayReceiver(Startable):
                 await self._consumer.commit()
                 continue
 
-            await self._receive_tray_use_case.receive_tray(order)
-
             await self._consumer.commit()
+
+            yield order
