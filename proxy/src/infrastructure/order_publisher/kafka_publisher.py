@@ -31,7 +31,7 @@ class KafkaOrderPublisher(OrderPublisher, Startable):
     async def publish(self, order: Order):
         created_event = OrderCreatedEvent(
             payload=order,
-            event_type="OrderCreated",
+            event_type="order.created",
             schema_version=1,
         )
         await self._publish(created_event)
