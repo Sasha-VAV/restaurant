@@ -1,4 +1,4 @@
-from src.domain.entities.order import Order, Food
+from src.domain.entities.order import Order, Food, FinishedOrder
 
 
-__all__ = ["Order", "Food"]
+__all__ = ["Order", "Food", "FinishedOrder"]

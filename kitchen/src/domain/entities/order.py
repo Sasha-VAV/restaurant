@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 
 @dataclass(frozen=True)
@@ -19,3 +19,6 @@ class Order:
 class FinishedOrder:
     id: str
     tray_id: str
+
+    def to_dict(self) -> dict:
+        return asdict(self)

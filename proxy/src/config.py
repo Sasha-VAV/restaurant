@@ -3,7 +3,9 @@ from pydantic_settings import BaseSettings
 
 class KafkaSettings(BaseSettings):
     bootstrap_servers: str = "localhost:9092"
-    orders_topic: str = "orders.created"
+    group_id: str = "proxy-service"
+    created_orders_topic: str = "orders.created"
+    finished_orders_topic: str = "orders.finished"
 
 
 class AppSettings(BaseSettings):

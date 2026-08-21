@@ -43,7 +43,7 @@ class KafkaOrderPublisher(OrderPublisher, Startable):
             )
 
         await self._producer.send_and_wait(
-            topic=self._settings.orders_topic,
+            topic=self._settings.created_orders_topic,
             key=event.message_id,
             value=event.payload_to_dict(),
             headers=[

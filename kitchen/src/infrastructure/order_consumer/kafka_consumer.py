@@ -26,7 +26,7 @@ class KafkaOrderConsumer(Startable):
 
     async def start(self):
         self._kafka_consumer = AIOKafkaConsumer(
-            self._kafka_settings.topic,
+            self._kafka_settings.order_created_topic,
             bootstrap_servers=self._kafka_settings.bootstrap_servers,
             group_id=self._kafka_settings.group_id,
             key_deserializer=lambda m: m,
@@ -52,6 +52,11 @@ class KafkaOrderConsumer(Startable):
             headers = msg.headers
             if not verify_headers(headers, EXPECTED_HEADERS):
                 print("Invalid message headers, skipping message")
+                await self._kafka_consumer.commit()
+                continue
+
+            if msg.value is None:
+                print("Received message with no value, skipping message")
                 await self._kafka_consumer.commit()
                 continue
 

@@ -1,8 +1,12 @@
 import json
+import typing
+
 from src.domain.entities.order import Order, Food
 
 
-def verify_headers(headers: list[tuple[str, bytes]], expected: dict[str, str]) -> bool:
+def verify_headers(
+    headers: typing.Iterable[tuple[str, bytes]], expected: dict[str, str]
+) -> bool:
     for key, value in headers:
         if key not in expected or value.decode() != expected[key]:
             return False

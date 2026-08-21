@@ -13,3 +13,9 @@ class Order:
     id: str
     customer_id: str
     items: list[Food]
+
+
+@dataclass(frozen=True)
+class FinishedOrder:
+    id: str
+    tray_id: str
