@@ -8,7 +8,9 @@ from src.api.routers import orders
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    publisher = KafkaOrderPublisher()
+    settings: Settings = app.state.settings
+
+    publisher = KafkaOrderPublisher(settings=settings.kafka)
     await publisher.start()
 
     app.state.order_publisher = publisher
