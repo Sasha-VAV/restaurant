@@ -1,14 +1,15 @@
 import asyncio
+import contextlib
 import typing as tp
 
 import grpc
-from grpc.aio import ServicerContext
 from google.protobuf import empty_pb2
+from grpc.aio import ServicerContext
 
-from src.grpc_server.generated import orders_pb2_grpc, orders_pb2
-from src.grpc_server.mappers import food_proto_to_entity
 from src.application.use_cases import CreateOrder, ReceiveTray
 from src.domain import Food
+from src.grpc_server.generated import orders_pb2, orders_pb2_grpc
+from src.grpc_server.mappers import food_proto_to_entity
 
 
 class OrderServicer(orders_pb2_grpc.OrderServiceServicer):
@@ -20,6 +21,11 @@ class OrderServicer(orders_pb2_grpc.OrderServiceServicer):
         self, request: orders_pb2.CreateOrderRequest, context: ServicerContext
     ) -> orders_pb2.CreateOrderResponse:
         food_items = [food_proto_to_entity(food) for food in request.items]
+        if request.customer_id == "" or not food_items:
+            await context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "Customer ID and food items must be provided",
+            )
         order = await self._create_order.create_order(request.customer_id, food_items)
         return orders_pb2.CreateOrderResponse(order_id=order.id)
 
@@ -104,7 +110,5 @@ class OrderServicer(orders_pb2_grpc.OrderServiceServicer):
                 )
         finally:
             consume_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await consume_task
-            except asyncio.CancelledError:
-                pass

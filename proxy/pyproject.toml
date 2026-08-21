@@ -18,3 +18,13 @@ dependencies = [
 dev = [
     "pytest>=9.1.1",
 ]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",   # pycodestyle + pyflakes (defaults)
+    "I",             # isort — import sorting
+    "UP",            # pyupgrade — modernize syntax for your target Python version
+    "B",             # flake8-bugbear — common bug patterns (mutable defaults, etc.)
+    "SIM",           # flake8-simplify
+    "C4",            # flake8-comprehensions
+]
