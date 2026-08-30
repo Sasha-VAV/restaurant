@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package orders.v1;
+
+import "google/protobuf/empty.proto";
+
+message Food {
+    string id = 1;
+    string name = 2;
+    int64 price = 3;
+}
+
+message CreateOrderRequest {
+    string customer_id = 1;
+    repeated Food items = 2;
+}
+
+message CreateOrderResponse {
+    string order_id = 1;
+}
+
+message OrderReadyNotification {
+    string order_id = 1;
+    string tray_id = 2;
+}
+
+message OrderStreamChunk {
+    oneof chunk {
+        string customer_id = 1;
+        Food food = 2;
+    }
+}
+
+service OrderService {
+    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+    rpc CreateOrderStream(stream OrderStreamChunk) returns (CreateOrderResponse);
+    rpc StreamReadyOrders(google.protobuf.Empty) returns (stream OrderReadyNotification);
+    rpc CreateOrdersWithLiveTray(stream OrderStreamChunk) returns (stream OrderReadyNotification);
+}
